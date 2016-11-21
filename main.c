@@ -16,17 +16,22 @@ int main(){
 
   while(1){
     char dest[256];
-    char cwd[100];
-    getcwd( cwd, sizeof(cwd) );
-    printf("%s$ ",cwd );
+    char fullcwd[100];
+    getcwd( fullcwd, sizeof(fullcwd) );
+
+    char *s = fullcwd;
+    char *lastDir;
+    int i;
+    for(i = 0; s; lastDir = strsep( &s, "/"), i++);
+
+    printf("machine:%s user$ ", lastDir );
     fgets(dest, 256, stdin);
     
     *strchr(dest, '\n')=0;
     
-    char *s = dest;
+    s = dest;
     char * command[100];
 
-    int i;
     for(i = 0; s; command[i] = strsep( &s, " "), i++);
     command[i]=0;
     
