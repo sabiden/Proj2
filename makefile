@@ -1,10 +1,10 @@
 GCC = gcc
 
-all: proj.o
-	$(GCC) proj.o
+all: main.o
+	$(GCC) main.o
 
-proj.o.o: proj.c proj.h
-	$(GCC) -c proj.c
+main.o: main.c main.h
+	$(GCC) -c main.c
 
 clean:
 	rm *.o
