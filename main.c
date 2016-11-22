@@ -12,26 +12,38 @@ void runcd( char target[] ){
     printf("-shell: cd: %s: %s\n", target, strerror( errno ));
 }
 
+void prompt() {
+  char fullcwd[100];
+  getcwd( fullcwd, sizeof(fullcwd) );
+  
+  char *s = fullcwd;
+  char *lastDir;
+  int i;
+  for(i = 0; s; lastDir = strsep( &s, "/"), i++);
+  
+  char hostName[100];
+  hostName[99] = 0;
+  gethostname( hostName, sizeof( hostName ) ); 
+
+  char *user = getlogin();
+
+  printf("%s:%s %s!? ", hostName, lastDir, user );
+}
+
 int main(){
 
   while(1){
+    prompt();
+    
     char dest[256];
-    char fullcwd[100];
-    getcwd( fullcwd, sizeof(fullcwd) );
-
-    char *s = fullcwd;
-    char *lastDir;
-    int i;
-    for(i = 0; s; lastDir = strsep( &s, "/"), i++);
-
-    printf("machine:%s user$ ", lastDir );
     fgets(dest, 256, stdin);
     
-    *strchr(dest, '\n')=0;
+    *strchr(dest, '\n') = 0;
     
-    s = dest;
+    char *s = dest;
     char * command[100];
-
+    
+    int i;
     for(i = 0; s; command[i] = strsep( &s, " "), i++);
     command[i]=0;
     
