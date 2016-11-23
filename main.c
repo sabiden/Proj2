@@ -4,14 +4,14 @@
 #include <string.h>
 #include <errno.h>
 #include "main.h"
+#include <fcntl.h>
 
 void runcd( char target[] ){
   int err;
-  if ( !strcmp(target,"") )
-    err = chdir("~");
-  else
+  if ( target )
     err = chdir( target );
-
+  else
+    err = chdir("~");
   if (err)
     printf("-shell: cd: %s: %s\n", target, strerror( errno ));
 }
@@ -36,6 +36,17 @@ void prompt() {
   printf("%s:%s %s!? ", hostName, lastDir, user );
 }
 
+int finder(char *command[], char *arg ){
+  int j = 0;
+  for( ; command[j]; j++){
+    if(!(strcmp(command[j],arg))){
+      return j;
+    }
+  }
+  return 0;
+}
+	 
+
 int main(){
 
   while(1){
@@ -53,17 +64,40 @@ int main(){
     for(i = 0; s; command[i] = strsep( &s, " "), i++);
     command[i]=0;
     
-    if( !(strcmp("cd",command[0])) ){
-      if ( command[1] )
-	runcd( command[1] );
-      else
-	runcd( "" );
-    }
+    if( !(strcmp("cd",command[0])) )
+      runcd( command[1] );
+    else if ( !strcmp("exit",command[0]))
+      return 0;
+    
     else{
       int f;
       f = fork();
+      
       if ( !f ){
-	execvp(command[0], command);
+	int loc;
+	if(loc = finder(command,">")) {
+	  char *file = command[ loc + 1];
+	  command[loc] = 0;
+	  int fd= open(file, O_CREAT | O_RDWR, 0644);
+	  dup2(fd,STDOUT_FILENO);
+	  execvp(command[0], command);
+	  
+	}
+	
+	else if(loc = finder(command,"<")) {
+	  char *file = command[ loc + 1];
+	  command[loc] = 0;
+	  int fd= open(file, O_CREAT | O_RDWR, 0644);
+	  dup2(fd,STDIN_FILENO);
+	  execvp(command[0], command);
+	  
+	}
+	
+
+
+	else{
+	  execvp(command[0], command);	
+	}
       }
       else{
 	int stats;
