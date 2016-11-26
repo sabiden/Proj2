@@ -51,9 +51,13 @@ int execute( char *input ) {
   char * command[100];
     
   int i;
-  for(i = 0; s; command[i] = strsep( &s, " "), i++);
-  command[i]=0;
-
+  for(i = 0; (command[i] = strsep( &s, " ")); i++)
+    if ( !strlen(command[i]) ) //to get rid of multiple spaces
+      i--;
+  
+  for (i = 0; command[i]; i++)
+    printf("command[%d]: %s, size: %lu\n", i, command[i], strlen(command[i]));
+  
   if ( !strcmp("exit",command[0]))
     return 0;
   else if( !(strcmp("cd",command[0])) )
@@ -115,9 +119,6 @@ int main(){
     line[i]=0;
 
     for(i = 0; line[i]; i++) {
-      //to get rid of possible spaces between comannds
-      while(line[i][0] == ' ')
-	line[i]++;
       status = execute( line[i] );
     }
   }
