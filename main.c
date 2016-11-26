@@ -107,7 +107,19 @@ int main(){
     //get rid of new line
     *strchr(in, '\n') = 0;
 
-    status = execute( in );
+    char *s = in;
+    char * line[15];
+
+    int i;
+    for(i = 0; s; line[i] = strsep( &s, ";"), i++);    
+    line[i]=0;
+
+    for(i = 0; line[i]; i++) {
+      //to get rid of possible spaces between comannds
+      while(line[i][0] == ' ')
+	line[i]++;
+      status = execute( line[i] );
+    }
   }
   return 0;
 }
