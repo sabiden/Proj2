@@ -55,8 +55,8 @@ int execute( char *input ) {
     if ( !strlen(command[i]) ) //to get rid of multiple spaces
       i--;
   
-  for (i = 0; command[i]; i++)
-    printf("command[%d]: %s, size: %lu\n", i, command[i], strlen(command[i]));
+  /* for (i = 0; command[i]; i++) */
+  /*   printf("command[%d]: %s, size: %lu\n", i, command[i], strlen(command[i])); */
   
   if ( !strcmp("exit",command[0]))
     return 0;
@@ -107,10 +107,10 @@ int main(){
 
     //get input
     char in[256];
-    fgets(in, 256, stdin);
+    fgets(in, sizeof(in), stdin);
     //get rid of new line
     *strchr(in, '\n') = 0;
-
+    
     char *s = in;
     char * line[15];
 
