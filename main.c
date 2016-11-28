@@ -68,14 +68,39 @@ int execute( char *input ) {
     f = fork();
       
     if ( !f ){
+      
       int loc;
+
       if( (loc = finder(command,">")) ) {
 	char *file = command[ loc + 1];
 	command[loc] = 0;
 	int fd= open(file, O_CREAT | O_RDWR, 0644);
 	dup2(fd,STDOUT_FILENO);
 	execvp(command[0], command);
-	
+      }
+      
+      else if( (loc = finder(command,">>")) ) {
+	char *file = command[ loc + 1];
+	command[loc] = 0;
+	int fd= open(file, O_APPEND | O_CREAT | O_RDWR, 0644);
+	dup2(fd,STDOUT_FILENO);
+	execvp(command[0], command);
+      }
+
+      else if( (loc = finder(command,"&>")) ) {
+	char *file = command[ loc + 1];
+	command[loc] = 0;
+	int fd= open(file, O_CREAT | O_RDWR, 0644);
+	dup2(fd,STDOUT_FILENO);
+	dup2(fd,STDERR_FILENO);
+	execvp(command[0], command);
+      }
+      else if( (loc = finder(command,"2>")) ) {
+	char *file = command[ loc + 1];
+	command[loc] = 0;
+	int fd= open(file, O_CREAT | O_RDWR, 0644);
+	dup2(fd,STDERR_FILENO);
+	execvp(command[0], command);
       }
       
       else if( (loc = finder(command,"<")) ) {
@@ -83,9 +108,9 @@ int execute( char *input ) {
 	command[loc] = 0;
 	int fd= open(file, O_CREAT | O_RDWR, 0644);
 	dup2(fd,STDIN_FILENO);
-	execvp(command[0], command);
-	
+	execvp(command[0], command);	
       }
+      
       else if( (loc = finder(command,"|")) ) {
 	char **command2 = &command[ loc + 1 ];
 	command[loc] = 0;
@@ -93,13 +118,19 @@ int execute( char *input ) {
 	
 	int f2 = fork();
 	if (!f2) {
-	  execvp(command2[0], command2);
-	}
-	else {	  
-	  dup2( STDOUT_FILENO, STDIN_FILENO );	  
+	  int fd= open("tmp", O_CREAT | O_WRONLY, 0644);
+	  dup2(fd, STDOUT_FILENO);
 	  execvp(command[0], command);
 	}
+	else {
+	  int stats;
+	  wait( &stats );
+	  int fd = open("tmp", O_RDONLY);
+	  dup2(fd, STDIN_FILENO);
+	  execvp(command2[0], command2);
+	}
       }
+
       else{
 	execvp(command[0], command);	
       }
