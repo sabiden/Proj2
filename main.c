@@ -75,16 +75,30 @@ int execute( char *input ) {
 	int fd= open(file, O_CREAT | O_RDWR, 0644);
 	dup2(fd,STDOUT_FILENO);
 	execvp(command[0], command);
-	  
-      }
 	
+      }
+      
       else if( (loc = finder(command,"<")) ) {
 	char *file = command[ loc + 1];
 	command[loc] = 0;
 	int fd= open(file, O_CREAT | O_RDWR, 0644);
 	dup2(fd,STDIN_FILENO);
 	execvp(command[0], command);
-	  
+	
+      }
+      else if( (loc = finder(command,"|")) ) {
+	char **command2 = &command[ loc + 1 ];
+	command[loc] = 0;
+	int newIn = dup( STDOUT_FILENO );
+	
+	int f2 = fork();
+	if (!f2) {
+	  execvp(command2[0], command2);
+	}
+	else {	  
+	  dup2( STDOUT_FILENO, STDIN_FILENO );	  
+	  execvp(command[0], command);
+	}
       }
       else{
 	execvp(command[0], command);	
