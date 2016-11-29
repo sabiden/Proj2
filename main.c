@@ -106,31 +106,32 @@ int execute( char *input ) {
       else if( (loc = finder(command,"<")) ) {
 	char *file = command[ loc + 1];
 	command[loc] = 0;
-	int fd= open(file, O_CREAT | O_RDWR, 0644);
+	int fd = open(file, O_CREAT | O_RDWR, 0644);
 	dup2(fd,STDIN_FILENO);
 	execvp(command[0], command);	
       }
-      
+
       else if( (loc = finder(command,"|")) ) {
 	char **command2 = &command[ loc + 1 ];
 	command[loc] = 0;
-	int newIn = dup( STDOUT_FILENO );
+	int fds[2];
+	pipe( fds );
 	
 	int f2 = fork();
 	if (!f2) {
-	  int fd= open("tmp", O_CREAT | O_WRONLY, 0644);
-	  dup2(fd, STDOUT_FILENO);
+	  close( fds[0] );
+	  dup2( fds[1], STDOUT_FILENO );
 	  execvp(command[0], command);
 	}
 	else {
 	  int stats;
 	  wait( &stats );
-	  int fd = open("tmp", O_RDONLY);
-	  dup2(fd, STDIN_FILENO);
+	  close( fds[1] );
+	  dup2( fds[0], STDIN_FILENO );
 	  execvp(command2[0], command2);
 	}
       }
-
+      
       else{
 	execvp(command[0], command);	
       }
