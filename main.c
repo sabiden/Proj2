@@ -49,7 +49,8 @@ int finder(char *command[], char *arg ){
 int execute( char *input ) {
   char *s = input;
   char * command[100];
-    
+
+  if (! strlen(input) ) return 1; 
   int i;
   for(i = 0; (command[i] = strsep( &s, " ")); i++)
     if ( !strlen(command[i]) ) //to get rid of multiple spaces
@@ -165,7 +166,7 @@ int main(){
     line[i]=0;
 
     for(i = 0; line[i]; i++) {
-      status = execute( line[i] );
+      status = status && execute( line[i] );
     }
   }
   return 0;
