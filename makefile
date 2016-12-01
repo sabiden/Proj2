@@ -1,10 +1,10 @@
-GCC = gcc 
+GCC = gcc
 
 all: main.o
-	$(GCC) main.o  -o SHELL 
+	$(GCC) main.o  -lreadline -Wall -std=c99 -o SHELL 
 
 main.o: main.c main.h
-	$(GCC) -c -lreadline main.c 
+	$(GCC) -c main.c
 
 clean:
 	rm *.o
