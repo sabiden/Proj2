@@ -5,8 +5,10 @@
 #include <errno.h>
 #include "main.h"
 #include <fcntl.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
-void prompt() {
+char *prompt() {
   char fullcwd[100];
   getcwd( fullcwd, sizeof(fullcwd) );
   
@@ -22,8 +24,9 @@ void prompt() {
   strsep( &s, ".");
   
   char *user = getlogin();
-
-  printf("%s:%s %s!? ", hostName, lastDir, user );
+  char *retString;
+  retString = (char *) malloc( 100 );
+  sprintf( retString, "%s:%s %s!? ", hostName, lastDir, user );
 }
 
 void runcd( char target[] ){
@@ -149,13 +152,13 @@ int main(){
   int status = 1;
   
   while( status ){
-    prompt();
+    char *pmt = prompt();
 
     //get input
-    char in[256];
-    fgets(in, sizeof(in), stdin);
+    //fgets(in, sizeof(in), stdin);
     //get rid of new line
-    *strchr(in, '\n') = 0;
+    //*strchr(in, '\n') = 0;
+    char *in = readline( pmt );
     
     char *s = in;
     char * line[15];
