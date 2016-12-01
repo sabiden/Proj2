@@ -27,6 +27,8 @@ char *prompt() {
   char *retString;
   retString = (char *) malloc( 100 );
   sprintf( retString, "%s:%s %s!? ", hostName, lastDir, user );
+
+  return retString;
 }
 
 void runcd( char target[] ){
@@ -154,7 +156,7 @@ int main(){
   
   while( status ){
     char *pmt = prompt();
-
+    
     //get input
     //fgets(in, sizeof(in), stdin);
     //get rid of new line
