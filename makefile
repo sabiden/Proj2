@@ -1,7 +1,7 @@
 GCC = gcc
 
 all: main.o
-	$(GCC) main.o  -lreadline -Wall -std=c99 -o SHELL 
+	$(GCC) main.o -lreadline -o SHELL 
 
 main.o: main.c main.h
 	$(GCC) -c main.c

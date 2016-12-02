@@ -4,8 +4,8 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "readline/readline.h"
+#include "readline/history.h"
 
 char *prompt();
 
