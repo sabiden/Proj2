@@ -34,10 +34,10 @@
 ###Known Bugs: 
 - Cannot do anything with files with spaces in their names.
 
-###Function Headers
-- char *prompt();
+###Function Headers:
+- char * prompt();
 - void runcd( char * );
-- int finder(char *command[], char * );
+- int finder(char * command[], char * );
 - int executeLine( char * );
-- int executeCommand( char *);
-- void executeFork(char *command[], int );
+- int executeCommand( char * );
+- void executeFork(char * command[], int );
