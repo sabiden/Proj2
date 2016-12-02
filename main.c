@@ -1,5 +1,9 @@
 #include "main.h"
-
+/*==================================================================================
+ char *promt()
+ returns information about the users location using getcwd, gethostname and getlogin
+ returns string of the hostname, penultimate directory and username
+ ==================================================================================*/
 char *prompt() {
   char fullcwd[100];
   getcwd( fullcwd, sizeof(fullcwd) );
@@ -22,13 +26,18 @@ char *prompt() {
 
   return retString;
 }
-
+/*==================================================================================
+ void runcd( char *target )
+ command: takes a target which is a directory path
+ runs change directory to move to targer, if target is null it does nothing, if error  it prints an error
+ no returns
+ ==================================================================================*/
 void runcd( char *target ){
   int err;
   if ( target )
     err = chdir( target );
   else
-    err = chdir( 0 );
+    err = chdir(" ");
   if (err)
     printf("-shell: cd: %s: %s\n", target, strerror( errno ));
 }
@@ -43,9 +52,11 @@ int finder(char *command[], char *arg ){
   return 0;
 }
 
-// int executeLine( char *in )
-// in: a line read in using readline(), stored as a char*
-// returns 0 on exit, else 1
+/*==================================================================================
+ int executeLine( char *in )
+ char *in: a line returned from readline, hopefully containng a command
+ returns status which is inherited form main and used to exit the shell
+ ==================================================================================*/
 int executeLine( char *in ) {
   int status = 1;
   char *s = in;
@@ -60,10 +71,11 @@ int executeLine( char *in ) {
 
   return status;
 }
-
-// int executeCommand( char *input )
-// input: a single command (no ;'s), stored as a char*
-// returns 0 on exit, else 1
+/*===========================================================================
+ int executeCommand( char *input )
+ input: a single command (no ;'s), stored as a char*
+ returns 0 on exit, else 1
+=============================================================================*/
 int executeCommand( char *input ) {
   char *s = input;
   char * command[100];
@@ -89,16 +101,18 @@ int executeCommand( char *input ) {
   }
   return 1;
 }
-
-// void executeFork( char *command[] )
-// command: an array of strings created by delimiting input to executeCommand by " "
-// f: return value from fork() call
-// no returns
+/*==================================================================================
+ void executeFork( char *command[] )
+ command: an array of strings created by delimiting input to executeCommand by " "
+ f: return value from fork() call
+ runs the forked command, checks for redirects and then calls executeFork() on whatever doesnt remain
+ no returns
+ ==================================================================================*/
 void executeFork(char *command[], int f) {
   if ( !f ){
       
     int loc;
-
+    //pipe - redirects stdin and out using pipe()
     if( (loc = finder(command,"|")) ) {
       char **command2 = &command[ loc + 1 ];
       command[loc] = 0;
@@ -120,6 +134,7 @@ void executeFork(char *command[], int f) {
 	executeFork( command2, f );
       }
     }
+    //Redirects by copying file into stdout
     else if( (loc = finder(command,">")) ) {
       char *file = command[ loc + 1];
       command[loc] = 0;
@@ -127,7 +142,7 @@ void executeFork(char *command[], int f) {
       dup2(fd,STDOUT_FILENO);
       executeFork( command, f );
     }
-      
+    //redirects output by copying file into stdout, opens it with append  
     else if( (loc = finder(command,">>")) ) {
       char *file = command[ loc + 1];
       command[loc] = 0;
@@ -135,7 +150,7 @@ void executeFork(char *command[], int f) {
       dup2(fd,STDOUT_FILENO);
       executeFork( command, f );
     }
-
+    //redirects  outputs and errors by copying  file into stdout and stderr
     else if( (loc = finder(command,"&>")) ) {
       char *file = command[ loc + 1];
       command[loc] = 0;
@@ -144,6 +159,7 @@ void executeFork(char *command[], int f) {
       dup2(fd,STDERR_FILENO);
       executeFork( command, f );
     }
+    //redirects only errors by copying file into stderr
     else if( (loc = finder(command,"2>")) ) {
       char *file = command[ loc + 1];
       command[loc] = 0;
@@ -151,7 +167,7 @@ void executeFork(char *command[], int f) {
       dup2(fd,STDERR_FILENO);
       executeFork( command, f );
     }
-      
+    //redirects input by copying file into Stdin  
     else if( (loc = finder(command,"<")) ) {
       char *file = command[ loc + 1];
       command[loc] = 0;
@@ -159,7 +175,7 @@ void executeFork(char *command[], int f) {
       dup2(fd,STDIN_FILENO);
       executeFork( command, f );	
     }
-    
+    //theres nothing to redirect so we dont need to recuse anymore
     else{
       execvp(command[0], command);	
     }
@@ -169,8 +185,7 @@ void executeFork(char *command[], int f) {
     wait( &stats );
   }
 }
-// int main
-// returns 0
+
 int main(){
   int status = 1;
     
